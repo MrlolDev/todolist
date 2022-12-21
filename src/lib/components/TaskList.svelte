@@ -16,6 +16,7 @@
 				{sectionName}
 			</p>
 		</div>
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<div
 			class="px-2 py-1 bg-none hover:bg-gray-600/[.3] transition duration-300 cursor-pointer w-fit h-fit rounded"
 			on:click={() => {
