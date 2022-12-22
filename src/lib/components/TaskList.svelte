@@ -3,6 +3,7 @@
 	import CreateTask from './CreateTask.svelte';
 	export let sectionName: string;
 	export let tasks: TaskInterface[];
+	export let reloadTasks: () => Promise<void>;
 	import Task from './Task.svelte';
 	let createTaskP = false;
 </script>
@@ -32,10 +33,10 @@
 	</header>
 	<ul class="list-none flex flex-col items-start w-full gap-2">
 		{#if createTaskP}
-			<CreateTask close={() => (createTaskP = false)} {sectionName} />
+			<CreateTask close={() => (createTaskP = false)} {sectionName} {reloadTasks} />
 		{/if}
 		{#each tasks as task}
-			<Task {task} />
+			<Task {task} {reloadTasks} />
 		{/each}
 	</ul>
 </div>

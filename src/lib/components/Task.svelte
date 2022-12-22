@@ -1,20 +1,23 @@
 <script lang="ts">
 	import type TaskInterface from '$lib/interfaces/Task.interface';
 	export let task: TaskInterface;
+	export let reloadTasks: () => Promise<void>;
 	import { supabase } from '$lib/utils/supabase';
 	let editMode = false;
+	async function deleteTask() {
+		const { data, error } = await supabase.from('task').delete().eq('id', task.id);
+		if (error) {
+			alert(`Something went wrong:\n${error.message}`);
+			return;
+		}
+		await reloadTasks();
+	}
+
 	async function updateTask() {
 		var title = (<HTMLInputElement>document.getElementById('title-update-input')).value;
 		var description = (<HTMLInputElement>document.getElementById('description-update-input')).value;
 		if (title == '') title = task.title;
 		if (description == '') description = task.description;
-		const { data: selectData, error: selectError } = await supabase
-			.from('task')
-			.select()
-			.eq('id', task.id);
-
-		console.log('selectData', selectData); // make sure you get the row at which you would like to update here
-
 		const { data, error } = await supabase
 			.from('task')
 			.update({
@@ -62,7 +65,7 @@
 			alert(`Something went wrong:\n${error.message}`);
 			return;
 		}
-		window.location.reload();
+		await reloadTasks();
 	}
 </script>
 
@@ -70,11 +73,11 @@
 	class="cursor-move flex flex-col bg-neutral-800 hover:bg-neutral-700 transition duration-300 px-2 py-2 w-full rounded select-none"
 	draggable="true"
 >
-	<header class="flex flex-row justify-between ">
+	<header class="flex flex-row justify-between items-center">
 		{#if editMode}
 			<input
 				id="title-update-input"
-				class="text-base font-bold bg-neutral-600 border border-neutral-900 focus:border-blue-500 w-1/2 rounded outline-none p-1"
+				class="text-base font-bold bg-neutral-600 border border-neutral-900 focus:border-blue-500 w-[80%] rounded outline-none p-1"
 				placeholder={task.title}
 			/>
 			<!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -117,13 +120,17 @@
 	</header>
 	{#if editMode}
 		<textarea
-			class="text-sm mt-2 text-gray-300 bg-neutral-600 rounded border border-neutral-900 focus:border-blue-500 outline-none px-2 py-1 resize-none h-[12vh] w-[18vw]"
+			class="text-sm mt-2 text-gray-300 bg-neutral-600 rounded border border-neutral-900 focus:border-blue-500 outline-none px-2 py-1 resize-none h-[12vh] w-[95%]"
 			placeholder={task.description}
 			id="description-update-input"
 		/>
 		<button
 			class="px-4 py-1 mt-2 bg-blue-600 rounded transition duration-300 hover:bg-blue-500"
 			on:click={() => updateTask()}>Update Task</button
+		>
+		<button
+			class="px-4 py-1 mt-1 bg-red-600 rounded transition duration-300 hover:bg-red-500"
+			on:click={() => deleteTask()}>Delete Task</button
 		>
 	{:else}
 		<p class="text-sm text-gray-300">{task.description}</p>
